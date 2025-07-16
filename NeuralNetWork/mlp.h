@@ -17,7 +17,7 @@ class MLP {
     
     double alpha = 1.0;
 
-    double leaky_relu_alpha = 0.01;   // For Leaky ReLU
+    double leaky_relu_alpha = 0.01;   
     
     const double selu_scale = 1.0507;
     
@@ -50,6 +50,34 @@ class MLP {
     double identity(double x);
     
     vector<double> softmax(const vector<double>& z);
+
+    double relu_derivative(double x);
+
+    double leaky_relu_derivative(double x);
+    
+    double sigmoid_derivative(double x);
+    
+    double tanh_derivative(double x);
+    
+    double swish_derivative(double x);
+    
+    double elu_derivative(double x);
+    
+    double silu_derivative(double x);
+    
+    double gelu_derivative(double x);
+    
+    double selu_derivative(double x);
+    
+    double softplus_derivative(double x);
+    
+    double softsign_derivative(double x);
+    
+    double binary_step_derivative(double x);
+    
+    double identity_derivative(double x);
+    
+    vector<double> softmax_derivative(const vector<double>& z);
     
     void calculate();
     
@@ -57,7 +85,7 @@ public:
 
     MLP(const vector<size_t>& neurons, const vector<string>& activations,double alpha = 1.0);
     
-    vector<double> train();
+    vector<double> train(vector<double>& input, vector<double>& target, double learning_rate = 0.01);
 
     vector<double> prdct(vector<double>& input);
 
