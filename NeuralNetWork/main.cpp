@@ -1,11 +1,8 @@
-#include<iostream>
-#include"mlp.h"
+#include "mlp.h"
 
-int main(){
-
-    MLP({2,1});
-
-
-
+int main() {
+    
+     MLP mlp({2, 1}, { "sigmoid"}); // Пример с несколькими слоями
+        
     return 0;
 }

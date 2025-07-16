@@ -1,19 +1,19 @@
 #include <vector>
-#include <iostream>
-#include <random>
+#include <string>
+#pragma once
 
 
 using namespace std;
 
-
 class MLP {
-
     vector<vector<double>> bias;
 
     vector<vector<vector<double>>> weights;
 
-    vector<vector<double>> data;    
-
+    vector<vector<double>> data;
+    
+    vector<string> activationNames; 
+    
     double alpha = 1.0;
 
     double relu(double x);
@@ -24,18 +24,16 @@ class MLP {
 
     double swish(double x);
 
-    std::vector<double> softmax(const std::vector<double>& z);
-
+    vector<double> softmax(const vector<double>& z); 
+    
     double elu(double x);
     
     void calculate();
     
 public:
 
-    MLP(const vector<size_t>& neurons);
-
-    vector<double>prdct(vector<double>&input);
-
-
+    MLP(const vector<size_t>& neurons, const vector<string>& activations,double alpha = 1.0);
+    
+    vector<double> prdct(vector<double>& input);
 
 };
