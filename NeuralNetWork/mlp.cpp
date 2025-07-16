@@ -3,7 +3,7 @@
 #include<random>
 #include <iostream>
 
-double random_double(double min, double max) {
+double random_double(double min = -1, double max = 1) {
 
     static random_device rd;
     static mt19937 gen(rd());
@@ -126,8 +126,14 @@ MLP::MLP(const vector<size_t>& neurons, const vector<string>& activations,double
     }
 }
 
+vector<double> train(){
+    
+}
+
 vector<double> MLP::prdct(vector<double>& input) {
     data[0] = input; 
     calculate();
     return data.back();
 }
+
+

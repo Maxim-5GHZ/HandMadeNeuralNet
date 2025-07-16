@@ -6,6 +6,7 @@
 using namespace std;
 
 class MLP {
+
     vector<vector<double>> bias;
 
     vector<vector<vector<double>>> weights;
@@ -34,6 +35,8 @@ public:
 
     MLP(const vector<size_t>& neurons, const vector<string>& activations,double alpha = 1.0);
     
+    vector<double> train();
+
     vector<double> prdct(vector<double>& input);
 
 };
