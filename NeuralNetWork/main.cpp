@@ -1,8 +1,11 @@
-#include "mlp.h"
+#include<iostream>
+
+using namespace std;
 
 int main() {
-    
-     MLP mlp({2, 1}, { "sigmoid"}); // Пример с несколькими слоями
+    unsigned char a = 'A';
+    a = tolower(a);
+     cout<<a;
         
     return 0;
 }

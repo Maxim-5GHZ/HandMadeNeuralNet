@@ -17,17 +17,39 @@ class MLP {
     
     double alpha = 1.0;
 
+    double leaky_relu_alpha = 0.01;   // For Leaky ReLU
+    
+    const double selu_scale = 1.0507;
+    
+    const double selu_alpha = 1.67326;
+
     double relu(double x);
-
+    
+    double leaky_relu(double x);
+    
     double sigmoid(double x);
-
+    
     double tanh_activation(double x);
-
+    
     double swish(double x);
-
-    vector<double> softmax(const vector<double>& z); 
     
     double elu(double x);
+    
+    double silu(double x);
+    
+    double gelu(double x);
+    
+    double selu(double x);
+    
+    double softplus(double x);
+    
+    double softsign(double x);
+    
+    double binary_step(double x);
+    
+    double identity(double x);
+    
+    vector<double> softmax(const vector<double>& z);
     
     void calculate();
     
