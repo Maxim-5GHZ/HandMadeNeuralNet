@@ -3,8 +3,9 @@
 
 int main(){
 
-    MLP({1,2,1});
-    rdct();
+    MLP({2,1});
+
+
 
     return 0;
 }

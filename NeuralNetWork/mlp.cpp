@@ -1,5 +1,5 @@
 #include "mlp.h"
-
+#include<algorithm>
 
 double random_double(double min, double max) {
     static random_device rd;
@@ -9,8 +9,47 @@ double random_double(double min, double max) {
 }
 
 
-double relu(double x) {
+double MLP::relu(double x) {
     return x > 0 ? x : 0;
+}
+
+
+double MLP::sigmoid(double x) {
+    return 1.0 / (1.0 + exp(-x));
+}
+
+
+double MLP::tanh_activation(double x) {
+    return tanh(x);
+}
+
+
+double MLP::swish(double x) {
+    return x * sigmoid(x); 
+}
+
+
+std::vector<double> softmax(const std::vector<double>& z) {
+    std::vector<double> res(z.size());
+    double max_z = *std::max_element(z.begin(), z.end());
+    double sum_exp = 0.0;
+
+    for (size_t i = 0; i < z.size(); ++i) {
+        res[i] = exp(z[i] - max_z);
+        sum_exp += res[i];
+    }
+
+    for (auto& val : res) {
+        val /= sum_exp;
+    }
+
+    return res;
+}
+
+
+
+double MLP::elu(double x) {
+    return x > 0 ? x : alpha * (exp(x) - 1);
 }
 
 
