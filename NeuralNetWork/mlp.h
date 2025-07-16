@@ -9,8 +9,11 @@ using namespace std;
 class MLP {
 
     vector<vector<double>> bias;
+
     vector<vector<vector<double>>> weights;
+
     vector<vector<double>> data;    
+
     double alpha = 1.0;
 
     double relu(double x);
@@ -28,6 +31,7 @@ class MLP {
     void calculate();
     
 public:
+
     MLP(const vector<size_t>& neurons);
 
     vector<double>prdct(vector<double>&input);

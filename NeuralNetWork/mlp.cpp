@@ -72,6 +72,7 @@ MLP::MLP(const vector<size_t>& neurons) {
     size_t layers = neurons.size();
     bias.resize(layers);
     for (size_t i = 0; i < layers; ++i) {
+
         bias[i].resize(neurons[i]);
         for (auto& val : bias[i]) {
             val = random_double(-0.5, 0.5);  
