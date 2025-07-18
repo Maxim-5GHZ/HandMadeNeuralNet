@@ -8,7 +8,7 @@
 
 using namespace std;
 
-// Генерация случайного числа в диапазоне [min, max]
+
 double MLP::random_double(double min, double max) {
     static random_device rd;
     static mt19937 gen(rd());
@@ -16,12 +16,10 @@ double MLP::random_double(double min, double max) {
     return dist(gen);
 }
 
-// Проверка корректности функций активации
+
 void MLP::validate_activations(const vector<string>& activations) {
     for (const auto& act : activations) {
         string lower_act = act;
-        transform(lower_act.begin(), lower_act.end(), lower_act.begin(),
-                 [](unsigned char c) { return tolower(c); });
 
         if (lower_act != "relu" && lower_act != "leaky_relu" &&
             lower_act != "sigmoid" && lower_act != "tanh" &&
@@ -35,7 +33,7 @@ void MLP::validate_activations(const vector<string>& activations) {
     }
 }
 
-// Конструктор MLP
+
 MLP::MLP(const vector<size_t>& neurons, const vector<string>& activations, double alpha)
     : activationNames(activations), alpha(alpha) {
 
@@ -49,7 +47,7 @@ MLP::MLP(const vector<size_t>& neurons, const vector<string>& activations, doubl
 
     validate_activations(activations);
 
-    // Инициализация смещений
+  
     bias.resize(neurons.size());
     for (size_t i = 0; i < neurons.size(); ++i) {
         bias[i].resize(neurons[i]);
@@ -58,7 +56,7 @@ MLP::MLP(const vector<size_t>& neurons, const vector<string>& activations, doubl
         }
     }
 
-    // Инициализация весов (инициализация He)
+
     weights.resize(neurons.size() - 1);
     for (size_t i = 0; i < neurons.size() - 1; ++i) {
         double scale = sqrt(2.0 / neurons[i]);
@@ -71,14 +69,14 @@ MLP::MLP(const vector<size_t>& neurons, const vector<string>& activations, doubl
         }
     }
 
-    // Инициализация данных
+   
     data.resize(neurons.size());
     for (size_t i = 0; i < neurons.size(); ++i) {
         data[i].resize(neurons[i]);
     }
 }
 
-// Реализации функций активации
+
 double MLP::relu(double x) { return max(0.0, x); }
 double MLP::leaky_relu(double x) { return x > 0 ? x : leaky_relu_alpha * x; }
 double MLP::sigmoid(double x) { return 1.0 / (1.0 + exp(-x)); }
@@ -87,7 +85,7 @@ double MLP::swish(double x) { return x * sigmoid(x); }
 double MLP::elu(double x) { return x >= 0 ? x : alpha * (exp(x) - 1); }
 double MLP::silu(double x) { return x * sigmoid(x); }
 double MLP::gelu(double x) {
-    return 0.5 * x * (1.0 + tanh(sqrt(2.0 / M_PI) * (x + 0.044715 * pow(x, 3)));
+    return 0.5 * x * (1.0 + tanh(sqrt(2.0 / M_PI) * (x + 0.044715 * pow(x, 3))));
 }
 double MLP::selu(double x) {
     return selu_scale * (x > 0 ? x : selu_alpha * (exp(x) - 1));
@@ -111,7 +109,6 @@ vector<double> MLP::softmax(const vector<double>& z) {
     return res;
 }
 
-// Реализации производных функций активации
 double MLP::relu_derivative(double x) { return x > 0 ? 1.0 : 0.0; }
 double MLP::leaky_relu_derivative(double x) { return x > 0 ? 1.0 : leaky_relu_alpha; }
 double MLP::sigmoid_derivative(double x) {
@@ -131,7 +128,7 @@ double MLP::silu_derivative(double x) {
     return s + x * s * (1 - s);
 }
 double MLP::gelu_derivative(double x) {
-    double cdf = 0.5 * (1.0 + tanh(sqrt(2.0 / M_PI) * (x + 0.044715 * pow(x, 3)));
+    double cdf = 0.5 * (1.0 + tanh(sqrt(2.0 / M_PI) * (x + 0.044715 * pow(x, 3))));
     return cdf + x * (1.0 / sqrt(2 * M_PI)) * exp(-0.5 * x * x) * (1 + 0.134145 * x * x);
 }
 double MLP::selu_derivative(double x) {
@@ -156,10 +153,10 @@ vector<double> MLP::softmax_derivative(const vector<double>& z) {
     return derivative;
 }
 
-// Прямой проход через сеть
+
 void MLP::calculate() {
     for (size_t layer = 1; layer < data.size(); layer++) {
-        // Линейная комбинация
+        
         for (size_t neuron = 0; neuron < data[layer].size(); neuron++) {
             double sum = bias[layer][neuron];
             for (size_t prev_neuron = 0; prev_neuron < data[layer-1].size(); prev_neuron++) {
@@ -168,7 +165,7 @@ void MLP::calculate() {
             data[layer][neuron] = sum;
         }
 
-        // Применение функции активации
+
         string activation = activationNames[layer-1];
         transform(activation.begin(), activation.end(), activation.begin(),
                  [](unsigned char c) { return tolower(c); });
@@ -222,7 +219,7 @@ void MLP::calculate() {
                      [this](double x) { return binary_step(x); });
         }
         else if (activation == "identity") {
-            // Ничего не делаем - тождественная функция
+            ;
         }
         else if (activation == "softmax") {
             vector<double> sm_output = softmax(data[layer]);
@@ -231,7 +228,6 @@ void MLP::calculate() {
     }
 }
 
-// Обучение сети
 vector<double> MLP::train(const vector<double>& input, const vector<double>& target, double learning_rate) {
     if (input.size() != data[0].size()) {
         throw invalid_argument("Input size doesn't match network input layer size");
@@ -240,29 +236,29 @@ vector<double> MLP::train(const vector<double>& input, const vector<double>& tar
         throw invalid_argument("Target size doesn't match network output layer size");
     }
 
-    // Прямой проход
+ 
     data[0] = input;
     calculate();
 
-    // Обратное распространение ошибки
+
     vector<vector<double>> gradients(data.size());
     for (size_t i = 0; i < data.size(); ++i) {
         gradients[i].resize(data[i].size(), 0.0);
     }
 
-    // Градиент на выходном слое
+    
     for (size_t i = 0; i < data.back().size(); ++i) {
         gradients.back()[i] = data.back()[i] - target[i];
     }
 
-    // Распространение градиента
+
     for (size_t layer = data.size() - 1; layer > 0; --layer) {
         string activation = activationNames[layer - 1];
         transform(activation.begin(), activation.end(), activation.begin(),
                  [](unsigned char c) { return tolower(c); });
 
         for (size_t neuron = 0; neuron < data[layer].size(); ++neuron) {
-            // Вычисление производной
+          
             double derivative = 1.0;
             if (activation == "relu") {
                 derivative = relu_derivative(data[layer][neuron]);
@@ -310,7 +306,7 @@ vector<double> MLP::train(const vector<double>& input, const vector<double>& tar
 
             gradients[layer][neuron] *= derivative;
 
-            // Распространение на предыдущий слой
+            
             for (size_t prev_neuron = 0; prev_neuron < data[layer - 1].size(); ++prev_neuron) {
                 gradients[layer - 1][prev_neuron] += gradients[layer][neuron] *
                                                    weights[layer - 1][prev_neuron][neuron];
@@ -318,7 +314,7 @@ vector<double> MLP::train(const vector<double>& input, const vector<double>& tar
         }
     }
 
-    // Ограничение градиента (предотвращение взрывных градиентов)
+    
     double max_grad = 1.0;
     for (auto& layer_grads : gradients) {
         for (auto& grad : layer_grads) {
@@ -326,7 +322,7 @@ vector<double> MLP::train(const vector<double>& input, const vector<double>& tar
         }
     }
 
-    // Обновление весов
+    
     for (size_t layer = 0; layer < weights.size(); ++layer) {
         for (size_t prev_neuron = 0; prev_neuron < weights[layer].size(); ++prev_neuron) {
             for (size_t neuron = 0; neuron < weights[layer][prev_neuron].size(); ++neuron) {
@@ -337,7 +333,7 @@ vector<double> MLP::train(const vector<double>& input, const vector<double>& tar
         }
     }
 
-    // Обновление смещений
+    
     for (size_t layer = 1; layer < bias.size(); ++layer) {
         for (size_t neuron = 0; neuron < bias[layer].size(); ++neuron) {
             bias[layer][neuron] -= learning_rate * gradients[layer][neuron];
@@ -347,7 +343,7 @@ vector<double> MLP::train(const vector<double>& input, const vector<double>& tar
     return data.back();
 }
 
-// Предсказание
+
 vector<double> MLP::predict(const vector<double>& input) {
     if (input.size() != data[0].size()) {
         throw invalid_argument("Input size doesn't match network input layer size");
@@ -357,31 +353,31 @@ vector<double> MLP::predict(const vector<double>& input) {
     return data.back();
 }
 
-// Сохранение весов в файл
+
 void MLP::save_weights(const string& filename) const {
     ofstream file(filename, ios::binary);
     if (!file.is_open()) {
         throw runtime_error("Cannot open file for saving weights");
     }
 
-    // Сохраняем архитектуру сети
+
     size_t num_layers = bias.size();
     file.write(reinterpret_cast<const char*>(&num_layers), sizeof(num_layers));
 
-    // Сохраняем размеры слоев
+    
     for (const auto& layer : bias) {
         size_t layer_size = layer.size();
         file.write(reinterpret_cast<const char*>(&layer_size), sizeof(layer_size));
     }
 
-    // Сохраняем функции активации
+
     for (const auto& act : activationNames) {
         size_t act_size = act.size();
         file.write(reinterpret_cast<const char*>(&act_size), sizeof(act_size));
         file.write(act.c_str(), act_size);
     }
 
-    // Сохраняем веса
+ 
     for (const auto& layer : weights) {
         for (const auto& neuron_weights : layer) {
             file.write(reinterpret_cast<const char*>(neuron_weights.data()),
@@ -389,21 +385,21 @@ void MLP::save_weights(const string& filename) const {
         }
     }
 
-    // Сохраняем смещения
+   
     for (const auto& layer : bias) {
         file.write(reinterpret_cast<const char*>(layer.data()),
                  layer.size() * sizeof(double));
     }
 }
 
-// Загрузка весов из файла
+
 void MLP::load_weights(const string& filename) {
     ifstream file(filename, ios::binary);
     if (!file.is_open()) {
         throw runtime_error("Cannot open file for loading weights");
     }
 
-    // Проверяем архитектуру сети
+    
     size_t num_layers;
     file.read(reinterpret_cast<char*>(&num_layers), sizeof(num_layers));
     if (num_layers != bias.size()) {
@@ -418,7 +414,7 @@ void MLP::load_weights(const string& filename) {
         }
     }
 
-    // Проверяем функции активации
+    
     vector<string> saved_activations;
     for (size_t i = 0; i < num_layers - 1; ++i) {
         size_t act_size;
@@ -432,7 +428,7 @@ void MLP::load_weights(const string& filename) {
         throw runtime_error("Activation functions do not match");
     }
 
-    // Загружаем веса
+    
     for (auto& layer : weights) {
         for (auto& neuron_weights : layer) {
             file.read(reinterpret_cast<char*>(neuron_weights.data()),
@@ -440,7 +436,7 @@ void MLP::load_weights(const string& filename) {
         }
     }
 
-    // Загружаем смещения
+   
     for (auto& layer : bias) {
         file.read(reinterpret_cast<char*>(layer.data()),
                layer.size() * sizeof(double));
