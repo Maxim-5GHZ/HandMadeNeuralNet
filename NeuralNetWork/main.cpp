@@ -31,19 +31,12 @@ void quadratic_example()
         1, 
         16, 
         16, 
-        16,
+        //16,
         1}, 
     {
-        MLPActivators::leaky_relu,
-        MLPActivators::leaky_relu,
-        MLPActivators::leaky_relu,
-        MLPActivators::identity
-    },
-    {
-        MLPActivators::leaky_relu_derivative,
-        MLPActivators::leaky_relu_derivative,
-        MLPActivators::leaky_relu_derivative,
-        MLPActivators::identity_derivative
+      Activators::LEAKY_RELU,
+      Activators::LEAKY_RELU,
+      Activators::IDENTITY 
     },
     0.25);
 
@@ -53,13 +46,15 @@ void quadratic_example()
     for (int x = 0; x <= 15; x++) {
         inputs.push_back({double(x)});
         targets.push_back({double(x*x)});
+        targets.push_back({double(x*x)});
+
     }
 
     AppExecutionTimeCounter::StartMeasurement();
 
     //Можно уменьшить в 10 раз и раскоментировтаь третий внутренний слой, результат будет лучше, а скорость обучения в 6 раз быстрее.
     //Скорость вычисления сетью незначительно замедлится.
-    int epochs = 100000;
+    int epochs = 1000000;
     double learning_rate = 0.01;
 
     for (int epoch = 0; epoch < epochs; ++epoch) {
@@ -85,7 +80,7 @@ void quadratic_example()
     cout << "x   Сеть   Мат. Разность" << endl;
 
     AppExecutionTimeCounter::StartMeasurement();
-    for (int x = 0; x <= 30; x ++) {
+    for (int x = 0; x <= 15; x ++) {
         auto output = denormalize(mlp.predict(normalize({double(x)})));
         printf("%3d %5.0lf %5d\t%2.0f\n", x, round(output[0]), x*x, double(x*x) - round(output[0]));
     }

@@ -17,12 +17,13 @@ double MLP::random_double(double min, double max)
 }
 
 MLP::MLP(const vector<size_t> &neurons, 
-        const std::vector<std::function<double(double)>> &activations, 
-        const std::vector<std::function<double(double)>> &activationDerivatives,
-        double maxBiasValue,
-        double alpha)
-    : activations(activations), activationDerivatives(activationDerivatives), alpha(alpha)
+        const std::vector<short> &activate,
+        double maxBiasValue)
 {
+    
+    Activators Active(activate,alpha);
+    activations = Active.activation;
+    activationDerivatives = Active.derivative;
 
     if (neurons.size() < 2)
     {

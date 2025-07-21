@@ -9,7 +9,8 @@
 #include <cmath>
 #include <algorithm>
 #include <functional>
-#include "mlp_activators.h"
+
+#include"mlpActivators.hpp"
 
 class MLP {
 private:
@@ -20,7 +21,7 @@ private:
     std::vector<std::function<double(double)>> activationDerivatives;
 
 
-    double alpha = 1.0;
+    double alpha =  0.01;
   
    
     void calculate();
@@ -29,10 +30,8 @@ private:
 public:
     
     MLP(const std::vector<size_t>& neurons,
-        const std::vector<std::function<double(double)>> &activations,
-        const std::vector<std::function<double(double)>> &activationDerivatives,
-        double maxBiasValue,
-        double alpha = 1.0);
+        const std::vector<short> &activate,
+        double maxBiasValue);
 
    
     std::vector<double> train(const std::vector<double>& input,

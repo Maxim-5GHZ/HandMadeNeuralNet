@@ -1,25 +1,28 @@
+#ifndef MLP_ACTIVATORS_HPP
+#define MLP_ACTIVATORS_HPP
 #include <vector>
 #include <map>
 #include <string>
 #include <cmath>
 #include <functional>
 
+
 class Activators {
 public:
     
-    static const std::string RELU;
-    static const std::string LEAKY_RELU;
-    static const std::string SIGMOID;
-    static const std::string TANH;
-    static const std::string SWISH;
-    static const std::string ELU;
-    static const std::string SILU;
-    static const std::string GELU;
-    static const std::string SELU;
-    static const std::string SOFTPLUS;
-    static const std::string SOFTSIGN;
-    static const std::string BINARY_STEP;
-    static const std::string IDENTITY;
+    static inline const short RELU = 1;
+    static inline const short LEAKY_RELU = 2;
+    static inline const short SIGMOID = 3;
+    static inline const short TANH = 4;
+    static inline const short SWISH = 5;
+    static inline const short ELU = 6;
+    static inline const short SILU = 7;
+    static inline const short GELU = 8;
+    static inline const short SELU = 9;
+    static inline const short SOFTPLUS = 10;
+    static inline const short SOFTSIGN = 11;
+    static inline const short BINARY_STEP = 12;
+    static inline const short IDENTITY = 13;
 
 private:
     struct Pair {
@@ -30,7 +33,7 @@ private:
         std::function<double(double)> derevation;
     };
 
-    static const constexpr double alpha = 1.0;
+    static  constexpr double alpha = 0.01;
     static const constexpr double leaky_relu_alpha = 0.01;
     static const constexpr double selu_scale = 1.0507;
     static const constexpr double selu_alpha = 1.67326;
@@ -88,7 +91,7 @@ private:
     static double binary_step_derivative(double x) { return 0.0; }
     static double identity_derivative(double x) { return 1.0; }
 
-    std::map<std::string, Pair> mapFunc = {
+         std::map<short, Pair> mapFunc = {
         {RELU, {relu, relu_derivative}},
         {LEAKY_RELU, {leaky_relu, leaky_relu_derivative}},
         {SIGMOID, {sigmoid, sigmoid_derivative}},
@@ -108,7 +111,9 @@ public:
     std::vector<std::function<double(double)>> activation;
     std::vector<std::function<double(double)>> derivative;
 
-    Activators(const std::vector<std::string>& activatorStrings) {
+    Activators(std::vector<short> activatorStrings,double a)
+{
+   a;
         for (const auto& name : activatorStrings) {
             auto it = mapFunc.find(name);
             if (it != mapFunc.end()) {
@@ -120,16 +125,4 @@ public:
 };
 
 
-const std::string Activators::RELU = "relu";
-const std::string Activators::LEAKY_RELU = "leaky_relu";
-const std::string Activators::SIGMOID = "sigmoid";
-const std::string Activators::TANH = "tanh";
-const std::string Activators::SWISH = "swish";
-const std::string Activators::ELU = "elu";
-const std::string Activators::SILU = "silu";
-const std::string Activators::GELU = "gelu";
-const std::string Activators::SELU = "selu";
-const std::string Activators::SOFTPLUS = "softplus";
-const std::string Activators::SOFTSIGN = "softsign";
-const std::string Activators::BINARY_STEP = "binary_step";
-const std::string Activators::IDENTITY = "identity";
+#endif 
