@@ -2,6 +2,7 @@
 #include <vector>
 #include <cmath>
 #include "mlp.h"
+#include "exec_time.h"
 
 using namespace std;
 
@@ -23,11 +24,28 @@ vector<double> denormalize(const vector<double>& output) {
 }
 
 
-void quadratic_example() {
-
-    vector<size_t> neurons = {1, 16, 16, 1};
-    vector<string> activations = {"leaky_relu", "leaky_relu", "identity"};
-    MLP mlp(neurons, activations);
+void quadratic_example() 
+{
+    MLP mlp(
+    {
+        1, 
+        16, 
+        16, 
+        16,
+        1}, 
+    {
+        MLPActivators::leaky_relu,
+        MLPActivators::leaky_relu,
+        MLPActivators::leaky_relu,
+        MLPActivators::identity
+    },
+    {
+        MLPActivators::leaky_relu_derivative,
+        MLPActivators::leaky_relu_derivative,
+        MLPActivators::leaky_relu_derivative,
+        MLPActivators::identity_derivative
+    },
+    0.25);
 
     vector<vector<double>> inputs;
     vector<vector<double>> targets;
@@ -37,7 +55,11 @@ void quadratic_example() {
         targets.push_back({double(x*x)});
     }
 
-    int epochs = 1000000;
+    AppExecutionTimeCounter::StartMeasurement();
+
+    //Можно уменьшить в 10 раз и раскоментировтаь третий внутренний слой, результат будет лучше, а скорость обучения в 6 раз быстрее.
+    //Скорость вычисления сетью незначительно замедлится.
+    int epochs = 100000;
     double learning_rate = 0.01;
 
     for (int epoch = 0; epoch < epochs; ++epoch) {
@@ -51,18 +73,25 @@ void quadratic_example() {
 
         total_error /= inputs.size();
 
-        if (epoch % 1000 == 0) {
+        if (epoch % 10000 == 0) {
             cout << "Эпоха: " << epoch << ", Ошибка: " << total_error << endl;
         }
     }
 
-    cout << "\nРезультаты после обучения:" << endl;
-    cout << "x\tПрогноз\tРеальное значение" << endl;
+    double trainingTimeSeconds = AppExecutionTimeCounter::EndMeasurement();
+    printf("Время ренировки  (мек.) %1.3lf\n", trainingTimeSeconds);
 
-    for (int x = 0; x <= 15; x ++) {
+    cout << "Результаты после обучения:" << endl;
+    cout << "x   Сеть   Мат. Разность" << endl;
+
+    AppExecutionTimeCounter::StartMeasurement();
+    for (int x = 0; x <= 30; x ++) {
         auto output = denormalize(mlp.predict(normalize({double(x)})));
-        cout << x << "\t" << output[0] << "\t" << x*x << endl;
+        printf("%3d %5.0lf %5d\t%2.0f\n", x, round(output[0]), x*x, double(x*x) - round(output[0]));
     }
+    
+    double predictTimeSeconds = AppExecutionTimeCounter::EndMeasurement();
+    printf("Время вычислений (мсек.) %1.3lf\n", predictTimeSeconds * 1000.0);
 
     mlp.save_weights("quadratic_weights.bin");
    
