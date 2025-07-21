@@ -33,7 +33,7 @@ private:
         std::function<double(double)> derevation;
     };
 
-    static  constexpr double alpha = 0.01;
+    static const constexpr double alpha = 0.1;
     static const constexpr double leaky_relu_alpha = 0.01;
     static const constexpr double selu_scale = 1.0507;
     static const constexpr double selu_alpha = 1.67326;
@@ -53,7 +53,7 @@ private:
         return selu_scale * (x > 0 ? x : selu_alpha * (exp(x) - 1));
     }
     static double softplus(double x) { return log(1.0 + exp(x)); }
-    static double softsign(double x) { return x / (1.0 + abs(x)); }
+    static double softsign(double x) { return x / (1.0 + fabs(x)); }
     static double binary_step(double x) { return x < 0 ? 0 : 1; }
     static double identity(double x) { return x; }
 
@@ -85,7 +85,7 @@ private:
     }
     static double softplus_derivative(double x) { return 1.0 / (1.0 + exp(-x)); }
     static double softsign_derivative(double x) {
-        double denom = 1.0 + abs(x);
+        double denom = 1.0 + fabs(x);
         return 1.0 / (denom * denom);
     }
     static double binary_step_derivative(double x) { return 0.0; }
@@ -111,10 +111,10 @@ public:
     std::vector<std::function<double(double)>> activation;
     std::vector<std::function<double(double)>> derivative;
 
-    Activators(std::vector<short> activatorStrings,double a)
+    Activators(std::vector<short> activatorName,double a)
 {
    a;
-        for (const auto& name : activatorStrings) {
+        for (const auto& name : activatorName) {
             auto it = mapFunc.find(name);
             if (it != mapFunc.end()) {
                 activation.push_back(it->second.activation);

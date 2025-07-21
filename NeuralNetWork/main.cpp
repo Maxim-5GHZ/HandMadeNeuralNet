@@ -31,11 +31,12 @@ void quadratic_example()
         1, 
         16, 
         16, 
-        //16,
+        16,
         1}, 
     {
-      Activators::LEAKY_RELU,
-      Activators::LEAKY_RELU,
+      Activators::RELU,
+      Activators::RELU,
+      Activators::RELU,
       Activators::IDENTITY 
     },
     0.25);
@@ -54,7 +55,7 @@ void quadratic_example()
 
     //Можно уменьшить в 10 раз и раскоментировтаь третий внутренний слой, результат будет лучше, а скорость обучения в 6 раз быстрее.
     //Скорость вычисления сетью незначительно замедлится.
-    int epochs = 1000000;
+    int epochs = 100000;
     double learning_rate = 0.01;
 
     for (int epoch = 0; epoch < epochs; ++epoch) {
