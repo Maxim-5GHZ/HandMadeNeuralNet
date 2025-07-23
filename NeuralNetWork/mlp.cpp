@@ -8,7 +8,7 @@
 
 using namespace std;
 
-double MLP::random_double(double min, double max) {
+float MLP::random_float(float min, float max) {
     static random_device rd;
     static mt19937 gen(rd());
     uniform_real_distribution<> dist(min, max);
@@ -18,7 +18,7 @@ double MLP::random_double(double min, double max) {
 
 MLP::MLP(const vector<size_t>& neurons, 
         const vector<Activator::Function>& activate,
-        double maxBiasValue) {
+        float maxBiasValue) {
     
     Activator activator(activate);
     activations = activator.getActivations();
@@ -36,7 +36,7 @@ MLP::MLP(const vector<size_t>& neurons,
     bias.resize(neurons.size());
     for (size_t i = 0; i < neurons.size(); ++i) {
         bias[i].resize(neurons[i]);
-        double co;
+        float co;
         for (auto& val : bias[i]) {
             co++;
             val = sin(co*0.1)*maxBiasValue;
@@ -46,12 +46,12 @@ MLP::MLP(const vector<size_t>& neurons,
     
     weights.resize(neurons.size() - 1);
     for (size_t i = 0; i < neurons.size() - 1; ++i) {
-        double scale = sqrt(2.0 / neurons[i]);
+        float scale = sqrt(2.0 / neurons[i]);
         weights[i].resize(neurons[i]);
         for (size_t j = 0; j < neurons[i]; ++j) {
             weights[i][j].resize(neurons[i + 1]);
             for (size_t k = 0; k < neurons[i + 1]; ++k) {
-                weights[i][j][k] = random_double(-scale, scale);
+                weights[i][j][k] = random_float(-scale, scale);
             }
         }
     }
@@ -66,7 +66,7 @@ MLP::MLP(const vector<size_t>& neurons,
 void MLP::calculate() {
     for (size_t layer = 1; layer < data.size(); layer++) {
         for (size_t neuron = 0; neuron < data[layer].size(); neuron++) {
-            double sum = bias[layer][neuron];
+            float sum = bias[layer][neuron];
             for (size_t prev_neuron = 0; prev_neuron < data[layer - 1].size(); prev_neuron++) {
                 sum += weights[layer - 1][prev_neuron][neuron] * data[layer - 1][prev_neuron];
             }
@@ -80,9 +80,9 @@ void MLP::calculate() {
     }
 }
 
-vector<double> MLP::train(const vector<double>& input, 
-                         const vector<double>& target, 
-                         double learning_rate) {
+vector<float> MLP::train(const vector<float>& input, 
+                         const vector<float>& target, 
+                         float learning_rate) {
     if (input.size() != data[0].size()) {
         throw invalid_argument("Input size mismatch");
     }
@@ -95,7 +95,7 @@ vector<double> MLP::train(const vector<double>& input,
     calculate();
 
     
-    vector<vector<double>> gradients(data.size());
+    vector<vector<float>> gradients(data.size());
     for (size_t i = 0; i < data.size(); ++i) {
         gradients[i].resize(data[i].size(), 0.0);
     }
@@ -110,10 +110,10 @@ vector<double> MLP::train(const vector<double>& input,
         auto& derivative = activationDerivatives[layer - 1];
 
         for (size_t neuron = 0; neuron < data[layer].size(); ++neuron) {
-            double grad = gradients[layer][neuron] * derivative(data[layer][neuron]);
+            float grad = gradients[layer][neuron] * derivative(data[layer][neuron]);
             
-            
-            grad = max(-1.0, min(1.0, grad));
+
+            grad = -1.0 > (1.0 < grad ? 1.0 : grad ) ? -1.0 : (1.0 < grad ? 1.0 : grad ) ;
             gradients[layer][neuron] = grad;
 
             
@@ -127,7 +127,7 @@ vector<double> MLP::train(const vector<double>& input,
     for (size_t layer = 0; layer < weights.size(); ++layer) {
         for (size_t j = 0; j < weights[layer].size(); ++j) {
             for (size_t k = 0; k < weights[layer][j].size(); ++k) {
-                double delta = learning_rate * gradients[layer+1][k] * data[layer][j];
+                float delta = learning_rate * gradients[layer+1][k] * data[layer][j];
                 weights[layer][j][k] -= delta;
             }
         }
@@ -142,7 +142,7 @@ vector<double> MLP::train(const vector<double>& input,
     return data.back();
 }
 
-vector<double> MLP::predict(const vector<double>& input) {
+vector<float> MLP::predict(const vector<float>& input) {
     if (input.size() != data[0].size()) {
         throw invalid_argument("Input size mismatch");
     }
@@ -168,14 +168,14 @@ void MLP::save_weights(const string& filename) const {
     for (const auto& layer : weights) {
         for (const auto& neuron_weights : layer) {
             file.write(reinterpret_cast<const char*>(neuron_weights.data()),
-                       neuron_weights.size() * sizeof(double));
+                       neuron_weights.size() * sizeof(float));
         }
     }
 
    
     for (const auto& layer : bias) {
         file.write(reinterpret_cast<const char*>(layer.data()),
-                   layer.size() * sizeof(double));
+                   layer.size() * sizeof(float));
     }
 }
 
@@ -203,12 +203,12 @@ void MLP::load_weights(const string& filename) {
     for (auto& layer : weights) {
         for (auto& neuron_weights : layer) {
             file.read(reinterpret_cast<char*>(neuron_weights.data()),
-                      neuron_weights.size() * sizeof(double));
+                      neuron_weights.size() * sizeof(float));
         }
     }
 
     for (auto& layer : bias) {
         file.read(reinterpret_cast<char*>(layer.data()),
-                  layer.size() * sizeof(double));
+                  layer.size() * sizeof(float));
     }
 }

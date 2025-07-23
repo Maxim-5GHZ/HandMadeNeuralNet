@@ -13,25 +13,25 @@
 
 class MLP {
 private:
-    std::vector<std::vector<double>> bias;
-    std::vector<std::vector<std::vector<double>>> weights;
-    std::vector<std::vector<double>> data;
-    std::vector<std::function<double(double)>> activations;
-    std::vector<std::function<double(double)>> activationDerivatives;
+    std::vector<std::vector<float>> bias;
+    std::vector<std::vector<std::vector<float>>> weights;
+    std::vector<std::vector<float>> data;
+    std::vector<std::function<float(float)>> activations;
+    std::vector<std::function<float(float)>> activationDerivatives;
 
-    double random_double(double min, double max);
+    float random_float(float min, float max);
     void calculate();
 
 public:
     MLP(const std::vector<size_t>& neurons,
         const std::vector<Activator::Function>& activate,
-        double maxBiasValue);
+        float maxBiasValue);
 
-    std::vector<double> train(const std::vector<double>& input,
-                             const std::vector<double>& target,
-                             double learning_rate = 0.01);
+    std::vector<float> train(const std::vector<float>& input,
+                             const std::vector<float>& target,
+                             float learning_rate = 0.01);
 
-    std::vector<double> predict(const std::vector<double>& input);
+    std::vector<float> predict(const std::vector<float>& input);
 
     void save_weights(const std::string& filename) const;
     void load_weights(const std::string& filename);
