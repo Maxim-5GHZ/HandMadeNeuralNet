@@ -2,12 +2,12 @@
 #define MLP_ACTIVATORS_HPP
 
 #include <vector>
-#include <map>
 #include <string>
 #include <cmath>
 #include <functional>
 #include <stdexcept>
 
+template<typename T>
 class Activator {
 public:
     enum Function {
@@ -26,14 +26,14 @@ public:
     };
 
     struct ActivationPair {
-        std::function<float(float)> function;
-        std::function<float(float)> derivative;
+        std::function<T(T)> function;
+        std::function<T(T)> derivative;
     };
 
     Activator(const std::vector<Function>& functions, 
-              float alpha_val = 0.01,
-              float selu_alpha_val = 1.67326,
-              float selu_scale_val = 1.0507)
+              T alpha_val = T(0.01),
+              T selu_alpha_val = T(1.67326),
+              T selu_scale_val = T(1.0507))
         : alpha(alpha_val), selu_alpha(selu_alpha_val), selu_scale(selu_scale_val) 
     {
         for (auto func : functions) {
@@ -43,8 +43,8 @@ public:
                     derivatives.push_back(relu_derivative);
                     break;
                 case LEAKY_RELU:
-                    activations.push_back([this](float x) { return leaky_relu(x); });
-                    derivatives.push_back([this](float x) { return leaky_relu_derivative(x); });
+                    activations.push_back([this](T x) { return leaky_relu(x); });
+                    derivatives.push_back([this](T x) { return leaky_relu_derivative(x); });
                     break;
                 case SIGMOID:
                     activations.push_back(sigmoid);
@@ -59,16 +59,16 @@ public:
                     derivatives.push_back(swish_derivative);
                     break;
                 case ELU:
-                    activations.push_back([this](float x) { return elu(x); });
-                    derivatives.push_back([this](float x) { return elu_derivative(x); });
+                    activations.push_back([this](T x) { return elu(x); });
+                    derivatives.push_back([this](T x) { return elu_derivative(x); });
                     break;
                 case GELU:
                     activations.push_back(gelu);
                     derivatives.push_back(gelu_derivative);
                     break;
                 case SELU:
-                    activations.push_back([this](float x) { return selu(x); });
-                    derivatives.push_back([this](float x) { return selu_derivative(x); });
+                    activations.push_back([this](T x) { return selu(x); });
+                    derivatives.push_back([this](T x) { return selu_derivative(x); });
                     break;
                 case SOFTPLUS:
                     activations.push_back(softplus);
@@ -92,78 +92,78 @@ public:
         }
     }
 
-    const std::vector<std::function<float(float)>>& getActivations() const { return activations; }
-    const std::vector<std::function<float(float)>>& getDerivatives() const { return derivatives; }
+    const std::vector<std::function<T(T)>>& getActivations() const { return activations; }
+    const std::vector<std::function<T(T)>>& getDerivatives() const { return derivatives; }
 
-    static float relu(float x) { return x > 0 ? x : 0.0; }
-    static float relu_derivative(float x) { return x > 0 ? 1.0 : 0.0; }
+    static T relu(T x) { return x > 0 ? x : T(0); }
+    static T relu_derivative(T x) { return x > 0 ? T(1) : T(0); }
 
-    float leaky_relu(float x) const { return x > 0 ? x : alpha * x; }
-    float leaky_relu_derivative(float x) const { return x > 0 ? 1.0 : alpha; }
+    T leaky_relu(T x) const { return x > 0 ? x : alpha * x; }
+    T leaky_relu_derivative(T x) const { return x > 0 ? T(1) : alpha; }
 
-    static float sigmoid(float x) { return 1.0 / (1.0 + std::exp(-x)); }
-    static float sigmoid_derivative(float x) {
-        float s = sigmoid(x);
-        return s * (1 - s);
+    static T sigmoid(T x) { return T(1) / (T(1) + std::exp(-x)); }
+    static T sigmoid_derivative(T x) {
+        T s = sigmoid(x);
+        return s * (T(1) - s);
     }
 
-    static float tanh_activation(float x) { return std::tanh(x); }
-    static float tanh_derivative(float x) {
-        float t = tanh_activation(x);
-        return 1.0 - t * t;
+    static T tanh_activation(T x) { return std::tanh(x); }
+    static T tanh_derivative(T x) {
+        T t = tanh_activation(x);
+        return T(1) - t * t;
     }
 
-    static float swish(float x) { return x * sigmoid(x); }
-    static float swish_derivative(float x) {
-        float s = sigmoid(x);
-        return s + x * s * (1 - s);
+    static T swish(T x) { return x * sigmoid(x); }
+    static T swish_derivative(T x) {
+        T s = sigmoid(x);
+        return s + x * s * (T(1) - s);
     }
 
-    float elu(float x) const { return x >= 0 ? x : alpha * (std::exp(x) - 1); }
-    float elu_derivative(float x) const { return x >= 0 ? 1.0 : alpha * std::exp(x); }
+    T elu(T x) const { return x >= 0 ? x : alpha * (std::exp(x) - T(1)); }
+    T elu_derivative(T x) const { return x >= 0 ? T(1) : alpha * std::exp(x); }
 
-    static float gelu(float x) {
-        const float pi = 3.14159265358979323846;
-        return 0.5 * x * (1.0 + std::tanh(std::sqrt(2.0 / pi) * 
-               (x + 0.044715 * std::pow(x, 3))));
+    static T gelu(T x) {
+        const T pi = T(3.14159265358979323846);
+        return T(0.5) * x * (T(1) + std::tanh(std::sqrt(T(2) / pi) * 
+               (x + T(0.044715) * std::pow(x, T(3)))));
     }
-    static float gelu_derivative(float x) {
-        const float pi = 3.14159265358979323846;
-        float cdf = 0.5 * (1.0 + std::tanh(std::sqrt(2.0 / pi) * 
-               (x + 0.044715 * std::pow(x, 3))));
-        return cdf + x * (1.0 / std::sqrt(2 * pi)) * 
-               std::exp(-0.5 * x * x) * (1 + 0.134145 * x * x);
-    }
-
-    float selu(float x) const {
-        return selu_scale * (x > 0 ? x : selu_alpha * (std::exp(x) - 1));
-    }
-    float selu_derivative(float x) const {
-        return selu_scale * (x > 0 ? 1.0 : selu_alpha * std::exp(x));
+    static T gelu_derivative(T x) {
+        const T pi = T(3.14159265358979323846);
+        T cdf = T(0.5) * (T(1) + std::tanh(std::sqrt(T(2) / pi) * 
+               (x + T(0.044715) * std::pow(x, T(3)))));
+        return cdf + x * (T(1) / std::sqrt(T(2) * pi)) * 
+               std::exp(T(-0.5) * x * x) * (T(1) + T(0.134145) * x * x);
     }
 
-    static float softplus(float x) { return std::log(1.0 + std::exp(x)); }
-    static float softplus_derivative(float x) { return 1.0 / (1.0 + std::exp(-x)); }
-
-    static float softsign(float x) { return x / (1.0 + std::abs(x)); }
-    static float softsign_derivative(float x) {
-        float denom = 1.0 + std::abs(x);
-        return 1.0 / (denom * denom);
+    T selu(T x) const {
+        return selu_scale * (x > 0 ? x : selu_alpha * (std::exp(x) - T(1)));
+    }
+    T selu_derivative(T x) const {
+        return selu_scale * (x > 0 ? T(1) : selu_alpha * std::exp(x));
     }
 
-    static float binary_step(float x) { return x < 0 ? 0 : 1; }
-    static float binary_step_derivative(float x) { return 0.0; }
+    static T softplus(T x) { return std::log(T(1) + std::exp(x)); }
+    static T softplus_derivative(T x) { return T(1) / (T(1) + std::exp(-x)); }
 
-    static float identity(float x) { return x; }
-    static float identity_derivative(float x) { return 1.0; }
+    static T softsign(T x) { return x / (T(1) + std::abs(x)); }
+    static T softsign_derivative(T x) {
+        T denom = T(1) + std::abs(x);
+        return T(1) / (denom * denom);
+    }
+
+    static T binary_step(T x) { return x < 0 ? T(0) : T(1); }
+    static T binary_step_derivative(T x) { return T(0); }
+
+    static T identity(T x) { return x; }
+    static T identity_derivative(T x) { return T(1); }
 
 private:
-    const float alpha;
-    const float selu_alpha;
-    const float selu_scale;
+    const T alpha;
+    const T selu_alpha;
+    const T selu_scale;
     
-    std::vector<std::function<float(float)>> activations;
-    std::vector<std::function<float(float)>> derivatives;
+    std::vector<std::function<T(T)>> activations;
+    std::vector<std::function<T(T)>> derivatives;
 };
 
 #endif

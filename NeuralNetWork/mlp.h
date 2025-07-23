@@ -7,34 +7,38 @@
 #include <fstream>
 #include <random>
 #include <cmath>
-#include <algorithm>
 #include <functional>
 #include "mlpActivators.hpp"
 
+template<typename T>
 class MLP {
 private:
-    std::vector<std::vector<float>> bias;
-    std::vector<std::vector<std::vector<float>>> weights;
-    std::vector<std::vector<float>> data;
-    std::vector<std::function<float(float)>> activations;
-    std::vector<std::function<float(float)>> activationDerivatives;
+    std::vector<std::vector<T>> bias;
+    std::vector<std::vector<std::vector<T>>> weights;
+    std::vector<std::vector<T>> data;
+    std::vector<std::function<T(T)>> activations;
+    std::vector<std::function<T(T)>> activationDerivatives;
 
-    float random_float(float min, float max);
+    T random_float(T min, T max);
     void calculate();
 
 public:
     MLP(const std::vector<size_t>& neurons,
-        const std::vector<Activator::Function>& activate,
-        float maxBiasValue);
+        const std::vector<typename Activator<T>::Function>& activate,
+        T maxBiasValue);
 
-    std::vector<float> train(const std::vector<float>& input,
-                             const std::vector<float>& target,
-                             float learning_rate = 0.01);
+    std::vector<T> train(const std::vector<T>& input,
+                         const std::vector<T>& target,
+                         T learning_rate = T(0.01));
 
-    std::vector<float> predict(const std::vector<float>& input);
+    std::vector<T> predict(const std::vector<T>& input);
 
     void save_weights(const std::string& filename) const;
     void load_weights(const std::string& filename);
 };
+
+// Явное инстанцирование для float и double
+extern template class MLP<float>;
+extern template class MLP<double>;
 
 #endif
