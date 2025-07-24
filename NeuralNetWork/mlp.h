@@ -32,7 +32,13 @@ public:
                          T learning_rate = T(0.01));
 
     std::vector<T> predict(const std::vector<T>& input);
-
+   
+    const std::vector<std::vector<std::vector<T>>>& get_weights() const;
+    const std::vector<std::vector<T>>& get_biases() const;
+    
+    void set_weights(const std::vector<std::vector<std::vector<T>>>& new_weights);
+    void set_biases(const std::vector<std::vector<T>>& new_biases);
+    
     void save_weights(const std::string& filename) const;
     void load_weights(const std::string& filename);
 };

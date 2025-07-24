@@ -140,6 +140,59 @@ std::vector<T> MLP<T>::predict(const std::vector<T>& input) {
     return data.back();
 }
 
+
+
+template<typename T>
+const std::vector<std::vector<std::vector<T>>>& MLP<T>::get_weights() const {
+    return weights;
+}
+
+
+template<typename T>
+const std::vector<std::vector<T>>& MLP<T>::get_biases() const {
+    return bias;
+}
+
+
+template<typename T>
+void MLP<T>::set_weights(const std::vector<std::vector<std::vector<T>>>& new_weights) {
+    if (new_weights.size() != weights.size()) {
+        throw std::invalid_argument("Invalid number of weight layers");
+    }
+    
+    for (size_t i = 0; i < weights.size(); ++i) {
+        if (new_weights[i].size() != weights[i].size()) {
+            throw std::invalid_argument("Invalid number of neurons in weight layer " + std::to_string(i));
+        }
+        
+        for (size_t j = 0; j < weights[i].size(); ++j) {
+            if (new_weights[i][j].size() != weights[i][j].size()) {
+                throw std::invalid_argument("Invalid number of connections in layer " 
+                    + std::to_string(i) + " neuron " + std::to_string(j));
+            }
+        }
+    }
+    
+    weights = new_weights;
+}
+
+
+template<typename T>
+void MLP<T>::set_biases(const std::vector<std::vector<T>>& new_biases) {
+    if (new_biases.size() != bias.size()) {
+        throw std::invalid_argument("Invalid number of bias layers");
+    }
+    
+    for (size_t i = 0; i < bias.size(); ++i) {
+        if (new_biases[i].size() != bias[i].size()) {
+            throw std::invalid_argument("Invalid number of neurons in bias layer " + std::to_string(i));
+        }
+    }
+    
+    bias = new_biases;
+}
+
+
 template<typename T>
 void MLP<T>::save_weights(const std::string& filename) const {
     std::ofstream file(filename, std::ios::binary);

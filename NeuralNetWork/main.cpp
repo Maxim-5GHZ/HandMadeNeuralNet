@@ -28,21 +28,21 @@ void quadratic_example()
 {
     using T = float;
     MLP<T> mlp(
-        {1, 20, 20,1}, 
+        {1, 64, 64,64,1}, 
         {
             
-            
+            Activator<T>::RELU,
             Activator<T>::RELU,
             Activator<T>::RELU,
             Activator<T>::IDENTITY
         },
         T(0.25)
     );
-
+    int xx= 50;
     vector<vector<T>> inputs;
     vector<vector<T>> targets;
 
-    for (int x = 0; x <= 40; x++) {
+    for (int x = 0; x <= xx; x++) {
         inputs.push_back({T(x)});
         targets.push_back({T(x*x)});
     }
@@ -50,10 +50,10 @@ void quadratic_example()
     AppExecutionTimeCounter::StartMeasurement();
 
     int epochs = 100000;
-    T learning_rate = T(0.0001);
-
-    for (int epoch = 0; epoch < epochs; ++epoch) {
-        T total_error = T(0);
+    T learning_rate = T(0.0000005);
+    T total_error = T(1);
+    for (int epoch = 0; total_error > 0.1; ++epoch) {
+        total_error = T(0);
 
         for (size_t i = 0; i < inputs.size(); ++i) {
             auto output = denormalize<T>(
@@ -67,7 +67,7 @@ void quadratic_example()
 
         total_error /= static_cast<T>(inputs.size());
 
-        if (epoch % 10000 == 0) {
+        if (epoch % 10 == 0) {
             cout << "Эпоха: " << epoch << ", Ошибка: " << total_error << endl;
         }
     }
@@ -79,7 +79,7 @@ void quadratic_example()
     cout << "x   Сеть   Мат. Разность" << endl;
 
     AppExecutionTimeCounter::StartMeasurement();
-    for (int x = 0; x <= 40; x++) {
+    for (int x = 0; x <= xx; x++) {
         auto output = denormalize<T>(mlp.predict(normalize<T>({T(x)})));
         T predicted = round(output[0]);
         T actual = T(x*x);
