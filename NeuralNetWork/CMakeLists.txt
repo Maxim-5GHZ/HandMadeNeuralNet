@@ -8,12 +8,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(SOURCES
     main.cpp
     mlp.cpp
+    Perceptrone.cpp
 )
 
 
 set(HEADERS
     mlp.h
     exec_time.h
+    Perceptrone.h
 )
 
 

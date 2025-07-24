@@ -28,17 +28,14 @@ void quadratic_example()
 {
     using T = float;
     MLP<T> mlp(
-        {1, 64, 64,64,1}, 
+        {1, 8, 1}, 
         {
-            
-            Activator<T>::RELU,
-            Activator<T>::RELU,
             Activator<T>::RELU,
             Activator<T>::IDENTITY
         },
         T(0.25)
     );
-    int xx= 50;
+    int xx= 10;
     vector<vector<T>> inputs;
     vector<vector<T>> targets;
 
@@ -50,9 +47,9 @@ void quadratic_example()
     AppExecutionTimeCounter::StartMeasurement();
 
     int epochs = 100000;
-    T learning_rate = T(0.0000005);
+    T learning_rate = T(0.0000001);
     T total_error = T(1);
-    for (int epoch = 0; total_error > 0.1; ++epoch) {
+    for (int epoch = 0; total_error > 0.3; ++epoch) {
         total_error = T(0);
 
         for (size_t i = 0; i < inputs.size(); ++i) {
@@ -79,7 +76,7 @@ void quadratic_example()
     cout << "x   Сеть   Мат. Разность" << endl;
 
     AppExecutionTimeCounter::StartMeasurement();
-    for (int x = 0; x <= xx; x++) {
+    for (int x = 0; x <= xx*2; x++) {
         auto output = denormalize<T>(mlp.predict(normalize<T>({T(x)})));
         T predicted = round(output[0]);
         T actual = T(x*x);
