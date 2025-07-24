@@ -16,7 +16,7 @@ protected:
     std::vector<std::function<T(T)>> activations;
     std::vector<std::function<T(T)>> activationDerivatives;
 
-    T random_float(T min, T max);
+    static T random_float(T min, T max);
     void calculate();
 
 public:
