@@ -47,7 +47,7 @@ Perceptrone<T>::Perceptrone(const std::vector<size_t>& neurons,
         bias[i].resize(neurons[i]);
         T co = T(0);
         for (auto& val : bias[i]) {
-            val = std::sin(co * T(0.1)) * maxBiasValue;
+            val = random_float( -maxBiasValue, maxBiasValue);
             co += T(1);
         }
     }

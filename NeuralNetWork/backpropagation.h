@@ -8,5 +8,5 @@ public:
         const std::vector<typename Activator<T>::Function>& activate,
         T maxBiasValue);
     
-    std::vector<T> train(const std::vector<T>& input, const std::vector<T>& target, T learning_rate) override;
+    std::vector<T> train(const std::vector<T>& input, const std::vector<T>& target, T learning_rate);
 };

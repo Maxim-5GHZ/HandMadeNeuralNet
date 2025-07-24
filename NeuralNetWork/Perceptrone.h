@@ -23,8 +23,6 @@ public:
     Perceptrone(const std::vector<size_t>& neurons,
         const std::vector<typename Activator<T>::Function>& activate,
         T maxBiasValue);
-    
-    virtual std::vector<T> train(const std::vector<T>& input, const std::vector<T>& target, T learning_rate) = 0;
 
     std::vector<T> predict(const std::vector<T>& input);
    
