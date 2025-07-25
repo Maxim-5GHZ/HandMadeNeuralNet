@@ -1,16 +1,16 @@
 #include "genetic.h"
-#include <algorithm>
-#include <numeric>
 
 template<typename T>
 Genetic<T>::Genetic(const std::vector<size_t>& neurons,
         const std::vector<typename Activator<T>::Function>& activate,
         T maxBiasValue, size_t populationSize) : gen(std::random_device{}()) {
     generations.reserve(populationSize);
+    Perceptrone<T> base_model(neurons, activate, maxBiasValue);
     for(size_t i = 0; i < populationSize; i++) {
-        generations.emplace_back(Perceptrone<T>(neurons, activate, maxBiasValue));
+        generations.emplace_back(base_model);
     }
 }
+
 
 template<typename T>
 Perceptrone<T>& Genetic<T>::getModel(size_t numModel) {
@@ -35,7 +35,7 @@ void Genetic<T>::mutate(Gen& gen, T mutationRate) {
     auto weights = gen.model.get_weights();
     auto biases = gen.model.get_biases();
 
- 
+    
     for (auto& layer : weights) {
         for (auto& neuron_weights : layer) {
             for (auto& w : neuron_weights) {
@@ -46,7 +46,6 @@ void Genetic<T>::mutate(Gen& gen, T mutationRate) {
         }
     }
 
-    
     for (auto& layer : biases) {
         for (auto& b : layer) {
             if (prob_dist(this->gen) < mutationRate) {
@@ -59,10 +58,12 @@ void Genetic<T>::mutate(Gen& gen, T mutationRate) {
     gen.model.set_biases(biases);
 }
 
+
 template<typename T>
 void Genetic<T>::mutate(size_t index, T mutationRate) {
     mutate(generations[index], mutationRate);
 }
+
 
 template<typename T>
 void Genetic<T>::tourSelect(size_t tournamentSize) {
@@ -73,12 +74,12 @@ void Genetic<T>::tourSelect(size_t tournamentSize) {
     for (size_t i = 0; i < generations.size(); i++) {
         size_t best_index = dist(gen);
         T best_fitness = generations[best_index].fitness;
-        
         for (size_t j = 1; j < tournamentSize; j++) {
             size_t candidate_index = dist(gen);
-            if (generations[candidate_index].fitness > best_fitness) {
+            const T candidate_fitness = generations[candidate_index].fitness;
+            if (candidate_fitness > best_fitness) {
                 best_index = candidate_index;
-                best_fitness = generations[candidate_index].fitness;
+                best_fitness = candidate_fitness;
             }
         }
         new_generation.push_back(generations[best_index]);
@@ -89,18 +90,22 @@ void Genetic<T>::tourSelect(size_t tournamentSize) {
 
 template<typename T>
 void Genetic<T>::rouletteSelect() {
+    
     std::vector<T> fitnesses;
     fitnesses.reserve(generations.size());
+    T sum_fitness = T(0);
+    
     for (const auto& g : generations) {
         fitnesses.push_back(g.fitness);
+        sum_fitness += g.fitness;
     }
     
-    T sum_fitness = std::accumulate(fitnesses.begin(), fitnesses.end(), T(0));
-    std::uniform_real_distribution<T> dist(0, sum_fitness);
+   
+    if (sum_fitness <= T(0)) return;
     
+    std::uniform_real_distribution<T> dist(0, sum_fitness);
     std::vector<Gen> new_generation;
     new_generation.reserve(generations.size());
-    
     for (size_t i = 0; i < generations.size(); i++) {
         T r = dist(gen);
         T running_sum = T(0);

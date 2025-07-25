@@ -1,6 +1,4 @@
 #include <iostream>
-#include <vector>
-#include <cmath>
 #include "genetic.h"
 
 using namespace std;
@@ -25,14 +23,14 @@ vector<T> denormalize(const vector<T>& output) {
 
 int main() {
     using T = float;
-    size_t populationSize = 5000;
+    size_t populationSize = 500;
     Genetic<T> mlp(
-        {1, 10 ,1}, 
-        {  
+        {1, 32,32 ,1}, 
+        {   Activator<T>::RELU,
             Activator<T>::RELU,
             Activator<T>::IDENTITY
         },
-        T(0.25),
+        T(0.40),
         populationSize
     );
 
@@ -48,8 +46,8 @@ int main() {
 
     T total_error = T(1000000);
 
-    const T mutation_rate = 0.1;
-    const T target_error = 0.00001;
+    const T mutation_rate = 0.001;
+    const T target_error = 0.001;
     
     for (int epoch = 0; total_error > target_error; ++epoch) {
         total_error = T(0);
@@ -63,14 +61,14 @@ int main() {
                 model_error += abs(targets[i][0] - prediction[0]);
             }
             
-            mlp.setFitness(numberModel, 1.0f / (1.0f + model_error)); 
+            mlp.setFitness(numberModel, 1.0 / (1.0 + model_error)); 
             total_error += model_error;
         }
         
         total_error /= populationSize * inputs.size();
         
         
-        mlp.tourSelect(5); 
+        mlp.tourSelect(10); 
         for (size_t i = 0; i < populationSize; i++) {
             mlp.mutate(i, mutation_rate);
         }
