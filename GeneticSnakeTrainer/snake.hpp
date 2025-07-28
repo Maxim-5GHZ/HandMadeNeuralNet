@@ -19,10 +19,11 @@ struct Position {
 };
 
 struct SnakeConfig {
-    int width = 20;
-    int height = 20;
-    int initial_length = 4;
+    int width = 30;
+    int height = 30;
+    int initial_length = 15;
     int max_steps = 10000;
+    int max_steps_without_food = 300;
     char head_char = '@';
     char body_char = 'O';
     char food_char = 'F';
@@ -38,6 +39,7 @@ private:
     Position food;
     std::deque<Position> snake;
     int direction; 
+    int steps_without_food{0};
     bool game_over;
     int score;
     std::mt19937 gen;
@@ -92,6 +94,7 @@ private:
     }
 
     void update_without_render() {
+        steps_without_food++; 
         step_count++;
         if (step_count > config.max_steps) {
             game_over = true;
@@ -114,17 +117,23 @@ private:
             return;
         }
         
-        for (auto it = snake.begin() + 1; it != snake.end(); ++it) {
-            if (head == *it) {
-                game_over = true;
-                config.on_game_over();
-                return;
-            }
-        }
+       // {for (auto it = snake.begin() + 1; it != snake.end(); ++it) {
+           //if (head == *it) {
+          //      game_over = true;
+        //        config.on_game_over();
+        //        return;
+     //       }
+      //  }}
 
         snake.push_front(head);
+        if (steps_without_food >= config.max_steps_without_food) {
+            game_over = true;
+            config.on_game_over();
+            return;
+    }
 
         if (head == food) {
+            steps_without_food = 0;
             score += config.food_score;
             config.on_score_change(score);
             place_food();
@@ -141,7 +150,6 @@ private:
         cbreak();
         noecho();
         keypad(stdscr, TRUE);
-        timeout(100);
         curs_set(0);
     }
 
@@ -269,7 +277,8 @@ public:
 
     void update() {
         Position head = snake.front();
-        
+        steps_without_food++; 
+        step_count++;
         switch (direction) {
             case 0: head.y--; break;
             case 1: head.x++; break;
@@ -284,13 +293,13 @@ public:
             return;
         }
         
-        for (auto it = snake.begin() + 1; it != snake.end(); ++it) {
-            if (head == *it) {
-                game_over = true;
-                config.on_game_over();
-                return;
-            }
-        }
+       /// for (auto it = snake.begin() + 1; it != snake.end(); ++it) {
+          ///  if (head == *it) {
+            ///    game_over = true;
+          ///      config.on_game_over();
+///       return;
+        //    }
+      //  }
 
         snake.push_front(head);
 
@@ -301,6 +310,12 @@ public:
         } else {
             snake.pop_back();
         }
+
+        if (steps_without_food >= config.max_steps_without_food) {
+            game_over = true;
+            config.on_game_over();
+            return;
+         }
     }
 
     template<typename T>

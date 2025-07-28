@@ -12,6 +12,7 @@ struct GeneticSnakeTrainerConfig {
     size_t tournament_size = 3;
     T mutation_rate = 0.001;
     int max_steps_per_game = 10000;
+     
     bool visualize = true;
     int target_score = 100;
     std::function<void(size_t, T, T)> on_generation_end = [](size_t, T, T){};
@@ -24,7 +25,7 @@ class SnakeTrainer {
 private:
     Genetic<T>* genTrainer;
     GeneticSnakeTrainerConfig<T> config;
-    
+ 
 public:
     SnakeTrainer(Genetic<T>& gen, const GeneticSnakeTrainerConfig<T>& cfg = {})
         : genTrainer(&gen), config(cfg) {}
@@ -38,7 +39,7 @@ public:
             cbreak();
             noecho();
             curs_set(0);
-            timeout(100);
+          
             keypad(stdscr, TRUE);
         }
 
