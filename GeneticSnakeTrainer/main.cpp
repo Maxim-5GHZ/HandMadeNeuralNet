@@ -1,19 +1,62 @@
 #include "geneticSnakeTrainer.hpp"
+#include <iostream>
 
 using namespace std;
 using T = float;
 
-int main() {
-    const vector<size_t> neurons = {8, 16, 4};
-    const vector<typename Activator<T>::Function> activate = {
-        Activator<T>::RELU,
+void printProgress(size_t gen, T best, T avg) {
+    cout << "Generation " << gen 
+         << ": Best = " << best 
+         << ", Avg = " << avg << endl;
+}
 
-        Activator<T>::IDENTITY
+void onTargetReached() {
+    cout << "\n=== TARGET SCORE REACHED! ===\n";
+}
+
+int main() {
+    
+    const vector<size_t> neurons = {8,16, 4}; 
+    const vector<typename Activator<T>::Function> activations = {
+        
+        Activator<T>::RELU,   
+        Activator<T>::IDENTITY 
     };
     
-    Genetic<T> gen(neurons, activate, T(0.25), 20);
-    SnakeTrainer<T> trainer(gen, 20, 20, 10, 3, 0.01, 10000, true, 100);
-    trainer.run();
+
+    SnakeConfig snake_config;
+    snake_config.width = 20;
+    snake_config.height = 20;
+    snake_config.initial_length = 10;
+    snake_config.max_steps = 50;
+    snake_config.food_score = 10;
+    snake_config.head_char = '@';
+    snake_config.body_char = 'O';
+    snake_config.food_char = '*';
+    snake_config.wall_char = '#';
+    
+    GeneticSnakeTrainerConfig<T> trainer_config;
+    trainer_config.max_generations = 1000000000;
+    trainer_config.tournament_size = 10;
+    trainer_config.mutation_rate = 0.01;
+    trainer_config.target_score = 100;
+    trainer_config.visualize = true;
+    trainer_config.snake_config = snake_config;
+    
+  
+    trainer_config.on_generation_end = &printProgress;
+    trainer_config.on_target_reached = &onTargetReached;
+    
+    try {
+        Genetic<T> genetic_algorithm(neurons, activations, T(0.25), 50);
+        SnakeTrainer<T> trainer(genetic_algorithm, trainer_config);
+        
+        trainer.run();
+        
+        cout << "\nTraining completed!\n";
+    } catch (...) {
+        return 1;
+    }
     
     return 0;
 }

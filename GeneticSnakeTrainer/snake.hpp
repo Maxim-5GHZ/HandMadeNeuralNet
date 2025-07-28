@@ -1,3 +1,6 @@
+#ifndef SNAKE_HPP
+#define SNAKE_HPP
+
 #include <deque>
 #include <random>
 #include <stdexcept>
@@ -5,6 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <functional>
 
 struct Position {
     int x, y;
@@ -14,9 +18,23 @@ struct Position {
     }
 };
 
+struct SnakeConfig {
+    int width = 20;
+    int height = 20;
+    int initial_length = 4;
+    int max_steps = 10000;
+    char head_char = '@';
+    char body_char = 'O';
+    char food_char = 'F';
+    char wall_char = '#';
+    int food_score = 10;
+    std::function<void()> on_game_over = [](){};
+    std::function<void(int)> on_score_change = [](int){};
+};
+
 class SnakeGame {
 private:
-    int width, height;
+    SnakeConfig config;
     Position food;
     std::deque<Position> snake;
     int direction; 
@@ -26,11 +44,10 @@ private:
     std::uniform_int_distribution<> dist_x;
     std::uniform_int_distribution<> dist_y;
     int step_count;
-    int max_steps;
 
     void place_food() {
         int attempts = 0;
-        const int max_attempts = (width - 2) * (height - 2);
+        const int max_attempts = (config.width - 2) * (config.height - 2);
         
         while (attempts++ < max_attempts) {
             food.x = dist_x(gen);
@@ -48,6 +65,7 @@ private:
         }
         
         game_over = true;
+        config.on_game_over();
     }
 
     void process_input(int key) {
@@ -68,14 +86,20 @@ private:
                 game_over = true;
                 break;
             case 'p':
-                while (getch() != 'p') {} 
+                while (getch() != 'p') {}
                 break;
         }
     }
 
-    void update() {
-        Position head = snake.front();
+    void update_without_render() {
+        step_count++;
+        if (step_count > config.max_steps) {
+            game_over = true;
+            config.on_game_over();
+            return;
+        }
         
+        Position head = snake.front();
         switch (direction) {
             case 0: head.y--; break;
             case 1: head.x++; break;
@@ -83,14 +107,17 @@ private:
             case 3: head.x--; break;
         }
         
-        if (head.x <= 0 || head.x >= width-1 || head.y <= 0 || head.y >= height-1) {
+        if (head.x <= 0 || head.x >= config.width-1 || 
+            head.y <= 0 || head.y >= config.height-1) {
             game_over = true;
+            config.on_game_over();
             return;
         }
         
         for (auto it = snake.begin() + 1; it != snake.end(); ++it) {
             if (head == *it) {
                 game_over = true;
+                config.on_game_over();
                 return;
             }
         }
@@ -98,35 +125,12 @@ private:
         snake.push_front(head);
 
         if (head == food) {
-            score += 10;
+            score += config.food_score;
+            config.on_score_change(score);
             place_food();
         } else {
             snake.pop_back();
         }
-    }
-
-    void draw() const {
-        clear();
-        
-        for (int i = 0; i < width; i++) {
-            mvaddch(0, i, '#');
-            mvaddch(height-1, i, '#');
-        }
-        for (int i = 0; i < height; i++) {
-            mvaddch(i, 0, '#');
-            mvaddch(i, width-1, '#');
-        }
-
-        for (const auto& segment : snake) {
-            mvaddch(segment.y, segment.x, 'O');
-        }
-       
-        mvaddch(snake.front().y, snake.front().x, '@');
-        
-        mvaddch(food.y, food.x, 'F');
-        
-        mvprintw(height, 0, "Score: %d | Steps: %d/%d", score, step_count, max_steps);
-        refresh();
     }
 
     void init_ncurses() {
@@ -141,94 +145,27 @@ private:
         curs_set(0);
     }
 
-    template<typename T>
-    T get_distance(int dx, int dy) const {
-        if (dx == 0 && dy == 0) return T(0);
-        
-        Position head = snake.front();
-        int steps = 0;
-        while (true) {
-            head.x += dx;
-            head.y += dy;
-            steps++;
-            
-            if (head.x < 0 || head.x >= width || head.y < 0 || head.y >= height) {
-                break;
-            }
-            
-            bool body_found = false;
-            for (const auto& segment : snake) {
-                if (head == segment) {
-                    body_found = true;
-                    break;
-                }
-            }
-            if (body_found) break;
-        }
-        
-        return T(1) / T(steps);
-    }
-
-    void update_without_render() {
-        step_count++;
-        if (step_count > max_steps) {
-            game_over = true;
-            return;
-        }
-        
-        Position head = snake.front();
-        switch (direction) {
-            case 0: head.y--; break;
-            case 1: head.x++; break;
-            case 2: head.y++; break;
-            case 3: head.x--; break;
-        }
-        
-        if (head.x <= 0 || head.x >= width-1 || head.y <= 0 || head.y >= height-1) {
-            game_over = true;
-            return;
-        }
-        
-        for (auto it = snake.begin() + 1; it != snake.end(); ++it) {
-            if (head == *it) {
-                game_over = true;
-                return;
-            }
-        }
-
-        snake.push_front(head);
-
-        if (head == food) {
-            score += 10;
-            place_food();
-        } else {
-            snake.pop_back();
-        }
-    }
-
 public:
-    SnakeGame(int w, int h, int max_steps = 10000) 
-        : width(w), height(h), 
+    SnakeGame(const SnakeConfig& cfg = {}) 
+        : config(cfg),
           food(0, 0), 
           direction(1), 
           game_over(false), 
           score(0),
           gen(std::random_device()()),
-          dist_x(1, width-2),
-          dist_y(1, height-2),
-          step_count(0),
-          max_steps(max_steps) {
+          dist_x(1, config.width-2),
+          dist_y(1, config.height-2),
+          step_count(0) {
         
-        if (width < 5 || height < 5) {
+        if (config.width < 5 || config.height < 5) {
             throw std::invalid_argument("Game area too small (minimum 5x5)");
         }
 
-        int start_x = width / 2;
-        int start_y = height / 2;
-        snake.emplace_back(start_x, start_y);
-        snake.emplace_back(start_x - 1, start_y);
-        snake.emplace_back(start_x - 2, start_y);
-        snake.emplace_back(start_x - 3, start_y);
+        int start_x = config.width / 2;
+        int start_y = config.height / 2;
+        for (int i = 0; i < config.initial_length; ++i) {
+            snake.emplace_back(start_x - i, start_y);
+        }
         place_food();
     }
 
@@ -238,10 +175,6 @@ public:
 
     Position returnFoodPlace() const {
         return food;
-    }
-
-    void setMaxSteps(int steps) {
-        max_steps = steps;
     }
 
     void update_direction(int action) {
@@ -265,19 +198,109 @@ public:
             case 3: dx_current = -1; dy_current = 0; break;
         }
 
-        state[0] = get_distance<T>(dx_current, dy_current);
-        state[1] = get_distance<T>(dy_current, -dx_current);
-        state[2] = get_distance<T>(-dy_current, dx_current);
+        auto get_distance = [&](int dx, int dy) -> T {
+            if (dx == 0 && dy == 0) return T(0);
+            
+            Position pos = head;
+            int steps = 0;
+            while (true) {
+                pos.x += dx;
+                pos.y += dy;
+                steps++;
+                
+                if (pos.x < 0 || pos.x >= config.width || 
+                    pos.y < 0 || pos.y >= config.height) {
+                    break;
+                }
+                
+                bool body_found = false;
+                for (const auto& segment : snake) {
+                    if (pos == segment) {
+                        body_found = true;
+                        break;
+                    }
+                }
+                if (body_found) break;
+            }
+            
+            return T(1) / T(steps);
+        };
 
-        state[3] = static_cast<T>(food.x - head.x) / (width - 2);
-        state[4] = static_cast<T>(food.y - head.y) / (height - 2);
+        state[0] = get_distance(dx_current, dy_current);
+        state[1] = get_distance(dy_current, -dx_current);
+        state[2] = get_distance(-dy_current, dx_current);
+
+        state[3] = static_cast<T>(food.x - head.x) / (config.width - 2);
+        state[4] = static_cast<T>(food.y - head.y) / (config.height - 2);
         
         state[5] = static_cast<T>(dx_current);
         state[6] = static_cast<T>(dy_current);
         
-        state[7] = static_cast<T>(snake.size() - 3) / ((width-2)*(height-2) - 3);
+        state[7] = static_cast<T>(snake.size() - config.initial_length) / 
+                  ((config.width-2)*(config.height-2) - config.initial_length);
 
         return state;
+    }
+
+    void draw() const {
+        clear();
+        
+        for (int i = 0; i < config.width; i++) {
+            mvaddch(0, i, config.wall_char);
+            mvaddch(config.height-1, i, config.wall_char);
+        }
+        for (int i = 0; i < config.height; i++) {
+            mvaddch(i, 0, config.wall_char);
+            mvaddch(i, config.width-1, config.wall_char);
+        }
+
+        for (const auto& segment : snake) {
+            mvaddch(segment.y, segment.x, config.body_char);
+        }
+       
+        mvaddch(snake.front().y, snake.front().x, config.head_char);
+        
+        mvaddch(food.y, food.x, config.food_char);
+        
+        mvprintw(config.height, 0, "Score: %d | Steps: %d/%d", 
+                score, step_count, config.max_steps);
+        refresh();
+    }
+
+    void update() {
+        Position head = snake.front();
+        
+        switch (direction) {
+            case 0: head.y--; break;
+            case 1: head.x++; break;
+            case 2: head.y++; break;
+            case 3: head.x--; break;
+        }
+        
+        if (head.x <= 0 || head.x >= config.width-1 || 
+            head.y <= 0 || head.y >= config.height-1) {
+            game_over = true;
+            config.on_game_over();
+            return;
+        }
+        
+        for (auto it = snake.begin() + 1; it != snake.end(); ++it) {
+            if (head == *it) {
+                game_over = true;
+                config.on_game_over();
+                return;
+            }
+        }
+
+        snake.push_front(head);
+
+        if (head == food) {
+            score += config.food_score;
+            config.on_score_change(score);
+            place_food();
+        } else {
+            snake.pop_back();
+        }
     }
 
     template<typename T>
@@ -322,7 +345,7 @@ public:
             update_direction(action);
             update();
             draw();
-            napms(50); 
+            napms(50);
         }
         
         endwin();
@@ -346,3 +369,5 @@ public:
         }
     }
 };
+
+#endif
