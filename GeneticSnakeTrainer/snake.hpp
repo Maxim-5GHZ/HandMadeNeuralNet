@@ -1,6 +1,3 @@
-#ifndef SNAKE_HPP
-#define SNAKE_HPP
-
 #include <deque>
 #include <random>
 #include <stdexcept>
@@ -9,6 +6,8 @@
 #include <vector>
 #include <cmath>
 #include <functional>
+#include"Perceptrone.h"
+#pragma once
 
 struct Position {
     int x, y;
@@ -22,13 +21,13 @@ struct SnakeConfig {
     int width = 30;
     int height = 30;
     int initial_length = 15;
-    int max_steps = 10000;
-    int max_steps_without_food = 300;
+    int max_steps = 1000000000;
+    int max_steps_without_food = 300000;
     char head_char = '@';
     char body_char = 'O';
     char food_char = 'F';
     char wall_char = '#';
-    int food_score = 10;
+    int food_score = 1;
     std::function<void()> on_game_over = [](){};
     std::function<void(int)> on_score_change = [](int){};
 };
@@ -117,13 +116,13 @@ private:
             return;
         }
         
-       // {for (auto it = snake.begin() + 1; it != snake.end(); ++it) {
-           //if (head == *it) {
-          //      game_over = true;
-        //        config.on_game_over();
-        //        return;
-     //       }
-      //  }}
+    for (auto it = snake.begin() + 1; it != snake.end(); ++it) {
+           if (head == *it) {
+         game_over = true;
+       config.on_game_over();
+            return;
+         }
+   }
 
         snake.push_front(head);
         if (steps_without_food >= config.max_steps_without_food) {
@@ -293,13 +292,13 @@ public:
             return;
         }
         
-       /// for (auto it = snake.begin() + 1; it != snake.end(); ++it) {
-          ///  if (head == *it) {
-            ///    game_over = true;
-          ///      config.on_game_over();
-///       return;
-        //    }
-      //  }
+        for (auto it = snake.begin() + 1; it != snake.end(); ++it) {
+            if (head == *it) {
+                game_over = true;
+                config.on_game_over();
+                return;
+                }
+        }
 
         snake.push_front(head);
 
@@ -385,4 +384,3 @@ public:
     }
 };
 
-#endif

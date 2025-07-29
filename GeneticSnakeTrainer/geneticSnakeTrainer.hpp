@@ -1,10 +1,26 @@
-#ifndef GENETIC_SNAKE_TRAINER_HPP
-#define GENETIC_SNAKE_TRAINER_HPP
-
 #include "genetic.h"
 #include "snake.hpp"
 #include <iostream>
 #include <ncurses.h>
+#pragma once
+
+
+template<typename T>
+struct maxModel {
+    static T Fitness;  
+    
+    static void max(T fitness, Perceptrone<T>& mod) {
+        if (Fitness < fitness) {
+            Fitness = fitness;
+            mod.save_weights("weights.bin");
+        }
+    }
+};
+
+
+template<typename T>
+T maxModel<T>::Fitness = 0;
+
 
 template<typename T>
 struct GeneticSnakeTrainerConfig {
@@ -34,12 +50,13 @@ public:
         size_t population_size = genTrainer->getPopulationSize();
         bool target_reached = false;
         
+
+
         if (config.visualize) {
             initscr();
             cbreak();
             noecho();
             curs_set(0);
-          
             keypad(stdscr, TRUE);
         }
 
@@ -55,6 +72,7 @@ public:
                 if (config.visualize && i == 0) { 
                     int score = game.runWithRender(model);
                     T fitness = static_cast<T>(score);
+                    maxModel<T>::max(fitness ,model);
                     genTrainer->setFitness(i, fitness);
                     total_fitness += fitness;
                     
@@ -65,6 +83,7 @@ public:
                 } else {
                     int score = game.runWithoutRender(model);
                     T fitness = static_cast<T>(score);
+                    maxModel<T>::max(fitness ,model);
                     genTrainer->setFitness(i, fitness);
                     total_fitness += fitness;
                     
@@ -119,4 +138,3 @@ public:
     }
 };
 
-#endif
