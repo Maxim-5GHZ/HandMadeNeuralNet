@@ -28,7 +28,7 @@ void quadratic_example()
 {
     using T = float;
     Perceptrone<T> P (
-        {1, 16,  1}, 
+        {1, 32,  1}, 
         {   
             Activator<T>::RELU,
             Activator<T>::IDENTITY
@@ -48,7 +48,7 @@ void quadratic_example()
     AppExecutionTimeCounter::StartMeasurement();
 
   
-    T learning_rate = T(0.05);
+    T learning_rate = T(0.1);
     T total_error = T(1000000);
     for (int epoch = 0; total_error > 0.1; ++epoch) {
         total_error = T(0);

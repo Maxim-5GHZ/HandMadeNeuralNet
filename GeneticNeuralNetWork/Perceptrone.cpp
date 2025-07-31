@@ -12,16 +12,15 @@ template<typename T>
 void Perceptrone<T>::calculate() {
     for (size_t layer = 1; layer < data.size(); layer++) {
         for (size_t neuron = 0; neuron < data[layer].size(); neuron++) {
-            T sum = bias[layer][neuron];
+            data[layer][neuron] = bias[layer][neuron];
             for (size_t prev_neuron = 0; prev_neuron < data[layer - 1].size(); prev_neuron++) {
-                sum += weights[layer - 1][prev_neuron][neuron] * data[layer - 1][prev_neuron];
+                data[layer][neuron] += weights[layer - 1][prev_neuron][neuron] * data[layer - 1][prev_neuron];
             }
-            data[layer][neuron] = sum;
+             
         }
-
-        auto& activation = activations[layer - 1];
+        
         for (auto& val : data[layer]) {
-            val = activation(val);
+            val = activations[layer - 1](val);
         }
     }
 }

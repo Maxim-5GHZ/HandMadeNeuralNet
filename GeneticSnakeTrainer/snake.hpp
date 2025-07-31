@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include<immintrin.h>
 #include <functional>
 #include"Perceptrone.h"
 #pragma once

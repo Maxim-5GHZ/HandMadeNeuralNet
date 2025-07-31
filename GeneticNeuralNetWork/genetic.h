@@ -4,6 +4,7 @@
 #include "Perceptrone.h"
 #include <vector>
 #include <random>
+#include <utility>
 
 template<typename T>
 class Genetic {
@@ -11,13 +12,14 @@ class Genetic {
         T fitness;
         Perceptrone<T> model;
         
+        Gen(Perceptrone<T>&& m, T f = T(0)) : model(std::move(m)), fitness(f) {}
         Gen(const Perceptrone<T>& m, T f = T(0)) : model(m), fitness(f) {}
     };
 
     std::vector<Gen> generations;
     std::mt19937 gen;
 
-    void mutate(Gen& gen, T mutationRate);
+    void mutate(Gen& g, T mutationRate);
 
 public:
     Genetic(const std::vector<size_t>& neurons,
@@ -31,6 +33,8 @@ public:
     void tourSelect(size_t tournamentSize);
     void rouletteSelect();
     void mutate(size_t index, T mutationRate);
+    
+    size_t getPopulationSize() const { return generations.size(); }
 };
 
 #endif

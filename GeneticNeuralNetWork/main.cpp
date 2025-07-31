@@ -25,8 +25,9 @@ int main() {
     using T = float;
     size_t populationSize = 500;
     Genetic<T> mlp(
-        {1, 32,32 ,1}, 
+        {1, 16,16,16  ,1}, 
         {   Activator<T>::RELU,
+            Activator<T>::RELU,
             Activator<T>::RELU,
             Activator<T>::IDENTITY
         },
@@ -46,7 +47,7 @@ int main() {
 
     T total_error = T(1000000);
 
-    const T mutation_rate = 0.001;
+    const T mutation_rate = 0.00005;
     const T target_error = 0.001;
     
     for (int epoch = 0; total_error > target_error; ++epoch) {
