@@ -1,10 +1,8 @@
 #include "backpropagation.h"
 
 template<typename T>
-Backpropagation<T>::Backpropagation(const std::vector<size_t>& neurons,
-    const std::vector<typename Activator<T>::Function>& activate,
-    T maxBiasValue)
-    : Perceptrone<T>(neurons, activate, maxBiasValue) {}
+Backpropagation<T>::Backpropagation(Perceptrone<T>&perceptrone)
+    : Perceptrone<T>(perceptrone) {}
 
 template<typename T>
 std::vector<T> Backpropagation<T>::train(const std::vector<T>& input,

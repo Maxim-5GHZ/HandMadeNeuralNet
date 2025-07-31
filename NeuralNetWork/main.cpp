@@ -27,14 +27,15 @@ vector<T> denormalize(const vector<T>& output) {
 void quadratic_example() 
 {
     using T = float;
-    Backpropagation<T> mlp(
-        {1, 128,128, 1}, 
-        {   Activator<T>::RELU,
+    Perceptrone<T> P (
+        {1, 32,  1}, 
+        {   
             Activator<T>::RELU,
             Activator<T>::IDENTITY
         },
         T(0.25)
     );
+    Backpropagation<T> mlp(P);
     int xx= 5;
     vector<vector<T>> inputs;
     vector<vector<T>> targets;
@@ -47,9 +48,9 @@ void quadratic_example()
     AppExecutionTimeCounter::StartMeasurement();
 
   
-    T learning_rate = T(0.0001);
+    T learning_rate = T(0.1);
     T total_error = T(1000000);
-    for (int epoch = 0; total_error > 0.0000000001; ++epoch) {
+    for (int epoch = 0; total_error > 0.1; ++epoch) {
         total_error = T(0);
 
         for (size_t i = 0; i < inputs.size(); ++i) {

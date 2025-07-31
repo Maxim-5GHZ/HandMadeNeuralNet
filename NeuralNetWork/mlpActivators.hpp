@@ -144,7 +144,6 @@ public:
 
     static T softplus(T x) { return std::log(T(1) + std::exp(x)); }
     static T softplus_derivative(T x) { return T(1) / (T(1) + std::exp(-x)); }
-
     static T softsign(T x) { return x / (T(1) + std::abs(x)); }
     static T softsign_derivative(T x) {
         T denom = T(1) + std::abs(x);
