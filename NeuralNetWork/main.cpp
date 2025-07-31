@@ -28,7 +28,7 @@ void quadratic_example()
 {
     using T = float;
     Perceptrone<T> P (
-        {1, 32,  1}, 
+        {1, 16,  1}, 
         {   
             Activator<T>::RELU,
             Activator<T>::IDENTITY
@@ -48,7 +48,7 @@ void quadratic_example()
     AppExecutionTimeCounter::StartMeasurement();
 
   
-    T learning_rate = T(0.1);
+    T learning_rate = T(0.05);
     T total_error = T(1000000);
     for (int epoch = 0; total_error > 0.1; ++epoch) {
         total_error = T(0);
@@ -77,7 +77,7 @@ void quadratic_example()
     cout << "x   Сеть   Мат. Разность" << endl;
 
     AppExecutionTimeCounter::StartMeasurement();
-    for (int x = 0; x <= xx*2; x++) {
+    for (int x = 0; x <= xx; x++) {
         auto output = denormalize<T>(mlp.predict(normalize<T>({T(x)})));
         T predicted = round(output[0]);
         T actual = T(x*x);

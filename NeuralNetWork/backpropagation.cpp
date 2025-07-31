@@ -5,6 +5,11 @@ Backpropagation<T>::Backpropagation(Perceptrone<T>&perceptrone)
     : Perceptrone<T>(perceptrone) {}
 
 template<typename T>
+Perceptrone<T> Backpropagation<T>::getModel() {
+    return *this; 
+}
+
+template<typename T>
 std::vector<T> Backpropagation<T>::train(const std::vector<T>& input,
                    const std::vector<T>& target,
                    T learning_rate) {
