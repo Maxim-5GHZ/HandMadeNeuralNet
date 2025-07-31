@@ -6,6 +6,7 @@
 #include <cmath>
 #include <functional>
 #include "mlpActivators.hpp"
+#pragma once
 
 template<typename T>
 class Perceptrone {

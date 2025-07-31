@@ -26,22 +26,22 @@ int main() {
     
 
     SnakeConfig snake_config;
-    snake_config.width = 50;
-    snake_config.height = 50;
-    snake_config.initial_length = 25;
-    snake_config.max_steps = 500;
+    snake_config.width = 5;
+    snake_config.height = 5;
+    snake_config.initial_length = 1;
+    snake_config.max_steps = 100;
     snake_config.food_score = 1;
     snake_config.head_char = '@';
     snake_config.body_char = 'O';
     snake_config.food_char = '*';
     snake_config.wall_char = '#';
-    snake_config.max_steps_without_food = 150;
+    snake_config.max_steps_without_food = 20;
     GeneticSnakeTrainerConfig<T> trainer_config;
     trainer_config.max_generations = 100000;
     trainer_config.tournament_size = 50;
-    trainer_config.mutation_rate = 0.005;
+    trainer_config.mutation_rate = 0.5;
     trainer_config.target_score = 2000;
-    trainer_config.visualize = 0;
+    trainer_config.visualize = 1;
     trainer_config.snake_config = snake_config;
     
   
